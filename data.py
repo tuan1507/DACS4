@@ -15,21 +15,18 @@ train_transforms = transforms.Compose([
 ])
 
 test_transforms = transforms.Compose([
-    transforms.Resize((64, 64)),  # Thay đổi kích thước ảnh về 64x64
+    transforms.Resize((64, 64)),
     transforms.ToTensor(),
-    transforms.Normalize(mean, std)  # Chuẩn hóa ảnh
+    transforms.Normalize(mean, std)
 ])
 
 # Hàm để tải dữ liệu và trả về DataLoader
 def get_dataloaders(train_path, test_path):
-    # Tải dữ liệu
     train_dataset = datasets.ImageFolder(root=train_path, transform=train_transforms)
     test_dataset = datasets.ImageFolder(root=test_path, transform=test_transforms)
 
-    # Tạo DataLoader cho dữ liệu huấn luyện và kiểm tra
     train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
     test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
 
-    # Lấy nhãn của lớp
-    classes = train_dataset.classes
+    classes = train_dataset.classes  # Danh sách tên nhãn
     return train_loader, test_loader, classes

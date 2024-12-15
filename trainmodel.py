@@ -2,12 +2,12 @@ import torch
 import torch.optim as optim
 import torch.nn as nn
 from model import ColorCNN
-from data import get_dataloaders  # Nhập hàm tải dữ liệu
+from data import get_dataloaders
 
 # Các tham số và đường dẫn
 train_path = './Data/train/'
 test_path = './Data/val/'
-num_epochs = 10
+num_epochs = 30
 
 # Hàm mất mát và tối ưu hóa
 criterion = nn.CrossEntropyLoss()
@@ -27,13 +27,9 @@ def train_model():
         running_loss = 0.0
 
         for images, labels in train_loader:
-            images, labels = images, labels
-
-            # Tiến hành truyền qua mô hình
             outputs = model(images)
             loss = criterion(outputs, labels)
 
-            # Quá trình lan truyền ngược
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
@@ -46,6 +42,5 @@ def train_model():
     torch.save(model.state_dict(), "color_cnn.pth")
     print("Mô hình đã được lưu!")
 
-# Chạy hàm huấn luyện
 if __name__ == "__main__":
     train_model()
