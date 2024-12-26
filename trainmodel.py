@@ -4,24 +4,19 @@ import torch.nn as nn
 from model import ColorCNN
 from data import get_dataloaders
 
-# Các tham số và đường dẫn
 train_path = './Data/train/'
 test_path = './Data/val/'
 num_epochs = 30
 
-# Hàm mất mát và tối ưu hóa
 criterion = nn.CrossEntropyLoss()
 
 def train_model():
-    # Tải dữ liệu và lấy nhãn lớp
     train_loader, _, classes = get_dataloaders(train_path, test_path)
     num_classes = len(classes)
 
-    # Khởi tạo mô hình
     model = ColorCNN(num_classes=num_classes)
     optimizer = optim.Adam(model.parameters(), lr=0.001)
 
-    # Vòng lặp huấn luyện
     for epoch in range(num_epochs):
         model.train()
         running_loss = 0.0
@@ -38,7 +33,6 @@ def train_model():
 
         print(f"Epoch [{epoch+1}/{num_epochs}], Loss: {running_loss/len(train_loader):.4f}")
 
-    # Lưu mô hình sau khi huấn luyện
     torch.save(model.state_dict(), "color_cnn.pth")
     print("Mô hình đã được lưu!")
 

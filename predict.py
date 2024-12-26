@@ -3,45 +3,55 @@ from model import ColorCNN
 from PIL import Image
 import numpy as np
 from data import *
+import cv2
 
-# Các tham số học máy
+
 mean = [0.5, 0.5, 0.5]
 std = [0.5, 0.5, 0.5]
 
-# Hàm biến đổi dữ liệu đầu vào (giống như trong quá trình huấn luyện)
+
 def transform(image):
-    image = image.resize((64, 64))  # Đảm bảo ảnh có kích thước 64x64
-    image = np.array(image).astype(np.float32) / 255.0  # Chuyển ảnh thành mảng numpy và đổi kiểu thành float32
-    image = (image - mean) / std  # Chuẩn hóa theo mean và std
-    image = torch.tensor(image.transpose((2, 0, 1)))  # Chuyển từ (H, W, C) sang (C, H, W)
-    image = image.float()  # Chuyển sang kiểu float32
+    image = image.resize((64, 64))
+    image = np.array(image).astype(np.float32) / 255.0
+    image = (image - mean) / std
+    image = torch.tensor(image.transpose((2, 0, 1)))
+    image = image.float()
     return image
 
 # Hàm dự đoán cho một ảnh mới
 def predict_image(image_path, model, transform, classes):
-    image = Image.open(image_path).convert('RGB')  # Đọc ảnh
+    image = Image.open(image_path).convert('RGB')
     image = transform(image).unsqueeze(0)  # Thêm batch dimension (C, H, W) -> (1, C, H, W)
 
-    model.eval()  # Chuyển mô hình sang chế độ đánh giá (evaluation)
-    with torch.no_grad():  # Tắt tính toán gradient
-        outputs = model(image)  # Dự đoán đầu ra
-        _, predicted = torch.max(outputs, 1)  # Lấy lớp có xác suất cao nhất
-        predicted_class = predicted.item()  # Lớp dự đoán (số)
-        predicted_class_name = classes[predicted_class]  # Lấy tên lớp từ danh sách classes
-        return predicted_class_name  # Trả về tên lớp
+    model.eval()
+    with torch.no_grad():
+        outputs = model(image)
+        _, predicted = torch.max(outputs, 1)
+        predicted_class = predicted.item()
+        predicted_class_name = classes[predicted_class]
+        return predicted_class_name
 
-# Đọc trọng số mô hình đã huấn luyện và lấy classes
-model = ColorCNN(num_classes=10)  # Đảm bảo số lớp giống như lúc huấn luyện
-model.load_state_dict(torch.load("color_cnn.pth"))  # Tải trọng số từ file
 
-# Tải classes từ quá trình huấn luyện (sử dụng lại phần get_dataloaders)
+model = ColorCNN(num_classes=10)
+model.load_state_dict(torch.load("color_cnn.pth"))
+
 train_path = './Data/train/'
 test_path = './Data/val/'
 _, _, classes = get_dataloaders(train_path, test_path)
 
-# Dự đoán cho một ảnh mới
-image_path = './Data/test/images.png'  # Đường dẫn đến ảnh cần dự đoán
+
+# image_path = './Data/test/hoa-hong-07.jpg'
+# image_path = './Data/test/quabo.jpg'
+# image_path = './Data/test/quadautay.jpg'
+image_path = './Data/test/nhieutraicay.jpg'
 predicted_class_name = predict_image(image_path, model, transform, classes)
 
-# In ra tên lớp dự đoán
-print(f"Dự đoán màu: {predicted_class_name}")
+
+image = cv2.imread(image_path)
+image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+window_name = f"Predicted: {predicted_class_name}"
+cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
+cv2.resizeWindow(window_name, 800, 600)
+cv2.imshow(window_name, cv2.cvtColor(image_rgb, cv2.COLOR_RGB2BGR))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
